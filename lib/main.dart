@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'layout.dart';
 import 'package:window_manager/window_manager.dart';
+import 'excel_like_table.dart';
+import 'layout.dart';
 
 
 void setupWindow() async {
@@ -71,6 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
       [const NavigationRailDestination(icon: Icon(Icons.fit_screen),    label: Text('Expanded')),   const LayoutExpanded()],
       [const NavigationRailDestination(icon: Icon(Icons.format_align_center), label: Text('Center')), const LayoutCenter()],
       [const NavigationRailDestination(icon: Icon(Icons.dashboard),     label: Text('Scaffold')),   const LayoutScaffold()],
+      [const NavigationRailDestination(icon: Icon(Icons.table_chart),     label: Text('Excel')),            ExcelLikePage()],
     ];
 
     Widget page;
