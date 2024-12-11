@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class ExcelLikePage extends StatefulWidget {
+  const ExcelLikePage({super.key});
+
   @override
   _ExcelLikePageState createState() => _ExcelLikePageState();
 }
@@ -24,11 +26,7 @@ class _ExcelLikePageState extends State<ExcelLikePage> {
         (rowIndex) => PlutoRow(
       cells: {
         'row_name': PlutoCell(value: '${rowIndex + 1}'), // Numeric row name
-        ...Map.fromIterable(
-          List.generate(10, (colIndex) => colIndex),
-          key: (colIndex) => 'column_$colIndex',
-          value: (colIndex) => PlutoCell(value: 'R${rowIndex + 1}C${colIndex + 1}'),
-        ),
+        ...{ for (var colIndex in List.generate(10, (colIndex) => colIndex)) 'column_$colIndex' : PlutoCell(value: 'R${rowIndex + 1}C${colIndex + 1}') },
       },
     ),
   );
@@ -36,7 +34,7 @@ class _ExcelLikePageState extends State<ExcelLikePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Excel-Like Table')),
+      appBar: AppBar(title: const Text('Excel-Like Table')),
       body: PlutoGrid(
         columns: [
           PlutoColumn(
@@ -51,7 +49,6 @@ class _ExcelLikePageState extends State<ExcelLikePage> {
         ],
         rows: _rows,
         onChanged: (PlutoGridOnChangedEvent event) {
-          print('Changed: ${event.rowIdx}, ${event.column?.field}, ${event.value}');
         },
         onLoaded: (PlutoGridOnLoadedEvent event) {
           _stateManager = event.stateManager;

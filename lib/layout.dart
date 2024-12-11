@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
+import 'common.dart';
 
 // Layout pages implementation
 
@@ -301,5 +304,127 @@ class ScrollableNavigationRail extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class FlutterComponentsPage extends StatelessWidget {
+  const FlutterComponentsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Flutter Components')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () => _showContextMenu(context),
+              child: const Text('Show Context Menu'),
+            ),
+            ElevatedButton(
+              onPressed: () => _showDialog(context),
+              child: const Text('Show Dialog'),
+            ),
+            ElevatedButton(
+              onPressed: () => _openIndependentWindow(context),
+              child: const Text('Open Independent Window'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 1. Flutter右键菜单组件
+  void _showContextMenu(BuildContext context) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (context) => Positioned(
+        left: MediaQuery.of(context).size.width / 2,
+        top: MediaQuery.of(context).size.height / 2,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            color: Colors.white,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    entry.remove();
+                  },
+                  child: const Text('Option 1'),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    entry.remove();
+                  },
+                  child: const Text('Option 2'),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    entry.remove();
+                  },
+                  child: const Text('Option 3'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    overlay.insert(entry);
+  }
+
+  // 2. Flutter对话框组件
+  void _showDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Dialog Title'),
+          content: const Text('This is the dialog content.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 3. Flutter打开独立窗口的组件
+  Future<void> _openIndependentWindow(BuildContext context) async {
+    // 获取主窗口的大小
+    final mainWindowSize = MediaQuery.of(context).size;
+
+    // 传递主窗口的宽高到子窗口
+    final window = await DesktopMultiWindow.createWindow(
+      jsonEncode({
+        'width': mainWindowSize.width,
+        'height': mainWindowSize.height,
+        'title': 'Independent Window',
+        'content': 'This is a new window!',
+      }),
+    );
+
+    // 设置子窗口位置和大小
+    window.setFrame(Rect.fromLTWH(100, 100, mainWindowSize.width, mainWindowSize.height));
+    window.show();
+
+    // 将窗口记录到全局变量
+    childWindows[window.windowId] = window;
   }
 }

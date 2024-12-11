@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
+import 'common.dart';
 import 'excel_like_table.dart';
 import 'layout.dart';
 
@@ -18,9 +19,12 @@ void setupWindow() async {
     await windowManager.focus();
   });
   windowManager.setMinimumSize(const Size(600, 400));
+
+  // 配置窗口关闭时拦截行为
+  windowManager.setPreventClose(true);
 }
 
-void main() async {
+void main(List<String> args) async {
   setupWindow();
   runApp(const MyApp());
 }
@@ -51,8 +55,37 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WindowListener {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    windowManager.addListener(this);
+  }
+
+  @override
+  void dispose() {
+    windowManager.removeListener(this);
+    super.dispose();
+  }
+
+  @override
+  void onWindowClose() async {
+    // 关闭子窗口
+    for (var window in childWindows.values) {
+      await window.close();
+    }
+    childWindows.clear();
+
+    final bool isPreventClose = await windowManager.isPreventClose();
+    if (!isPreventClose) return;
+    if (!mounted) return;
+
+    // 允许窗口关闭
+    await windowManager.setPreventClose(false);
+    await windowManager.close();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +105,8 @@ class _MyHomePageState extends State<MyHomePage> {
       [const NavigationRailDestination(icon: Icon(Icons.fit_screen),    label: Text('Expanded')),   const LayoutExpanded()],
       [const NavigationRailDestination(icon: Icon(Icons.format_align_center), label: Text('Center')), const LayoutCenter()],
       [const NavigationRailDestination(icon: Icon(Icons.dashboard),     label: Text('Scaffold')),   const LayoutScaffold()],
-      [const NavigationRailDestination(icon: Icon(Icons.table_chart),     label: Text('Excel')),            ExcelLikePage()],
+      [const NavigationRailDestination(icon: Icon(Icons.table_chart),     label: Text('Excel')),      const ExcelLikePage()],
+      [const NavigationRailDestination(icon: Icon(Icons.widgets),       label: Text('Components')), const FlutterComponentsPage()],
     ];
 
     Widget page;
