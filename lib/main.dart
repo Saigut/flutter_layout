@@ -1,31 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:window_manager/window_manager.dart';
-import 'common.dart';
 import 'excel_like_table.dart';
+import 'ffi_wrap.dart';
 import 'layout.dart';
 
 
-void setupWindow() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
-  WindowOptions windowOptions = const WindowOptions(
-    size: Size(1200, 800),
-    center: true,
-    backgroundColor: Colors.transparent,
-    skipTaskbar: false,
-  );
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.show();
-    await windowManager.focus();
-  });
-  windowManager.setMinimumSize(const Size(600, 400));
-
-  // 配置窗口关闭时拦截行为
-  windowManager.setPreventClose(true);
-}
-
 void main(List<String> args) async {
-  setupWindow();
   runApp(const MyApp());
 }
 
@@ -55,36 +34,26 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with WindowListener {
+class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
+  String? cppString;
 
   @override
   void initState() {
     super.initState();
-    windowManager.addListener(this);
+    loadCppString();
   }
 
   @override
   void dispose() {
-    windowManager.removeListener(this);
     super.dispose();
   }
 
-  @override
-  void onWindowClose() async {
-    // 关闭子窗口
-    for (var window in childWindows.values) {
-      await window.close();
-    }
-    childWindows.clear();
-
-    final bool isPreventClose = await windowManager.isPreventClose();
-    if (!isPreventClose) return;
-    if (!mounted) return;
-
-    // 允许窗口关闭
-    await windowManager.setPreventClose(false);
-    await windowManager.close();
+  Future<void> loadCppString() async {
+    final String result = getCppString();
+    setState(() {
+      cppString = result;
+    });
   }
 
   @override
@@ -107,6 +76,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
       [const NavigationRailDestination(icon: Icon(Icons.dashboard),     label: Text('Scaffold')),   const LayoutScaffold()],
       [const NavigationRailDestination(icon: Icon(Icons.table_chart),     label: Text('Excel')),      const ExcelLikePage()],
       [const NavigationRailDestination(icon: Icon(Icons.widgets),       label: Text('Components')), const FlutterComponentsPage()],
+      [      NavigationRailDestination(icon: Icon(Icons.widgets),       label: Text(cppString ?? "Loading...")), const FlutterComponentsPage()],
     ];
 
     Widget page;

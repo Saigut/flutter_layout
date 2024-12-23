@@ -1,0 +1,4 @@
+
+String getCppString() {
+  return "nothing";
+}

@@ -326,10 +326,10 @@ class FlutterComponentsPage extends StatelessWidget {
               onPressed: () => _showDialog(context),
               child: const Text('Show Dialog'),
             ),
-            ElevatedButton(
-              onPressed: () => _openIndependentWindow(context),
-              child: const Text('Open Independent Window'),
-            ),
+            // ElevatedButton(
+            //   onPressed: () => _openIndependentWindow(context),
+            //   child: const Text('Open Independent Window'),
+            // ),
           ],
         ),
       ),
